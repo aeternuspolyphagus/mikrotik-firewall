@@ -15,16 +15,6 @@ add action=drop chain=forward comment="Drop incoming from internet which is not 
 add action=drop chain=forward comment="Drop packets from LAN that do not have LAN IP" in-interface=bridge log=yes log-prefix=LAN_!LAN src-address=!192.168.88.0/24
 
 /ip firewall filter
-add chain=icmp protocol=icmp icmp-options=0:0 action=accept comment="echo reply"
-add chain=icmp protocol=icmp icmp-options=3:0 action=accept comment="net unreachable"
-add chain=icmp protocol=icmp icmp-options=3:1 action=accept comment="host unreachable"
-add chain=icmp protocol=icmp icmp-options=3:4 action=accept comment="host unreachable fragmentation required"
-add chain=icmp protocol=icmp icmp-options=8:0 action=accept comment="allow echo request"
-add chain=icmp protocol=icmp icmp-options=11:0 action=accept comment="allow time exceed"
-add chain=icmp protocol=icmp icmp-options=12:0 action=accept comment="allow parameter bad"
-add chain=icmp action=drop comment="deny all other types"
-
-/ip firewall filter
 add action=accept chain=input comment="defconf: accept ICMP after RAW" protocol=icmp
 add action=accept chain=input comment="defconf: accept established,related,untracked" connection-state=established,related,untracked
 add action=drop chain=input comment="defconf: drop all not coming from LAN" in-interface-list=!LAN
@@ -163,20 +153,8 @@ add action=return chain=SYN-Protect connection-state=new limit=200,5:packet prot
 add action=drop chain=SYN-Protect connection-state=new protocol=tcp tcp-flags=syn
 add action=drop chain=input comment="1.4. Protected - Ports Scanners" src-address-list="Port Scanners"
 add action=add-src-to-address-list address-list="Port Scanners" address-list-timeout=none-dynamic chain=input in-interface-list=Internet protocol=tcp psd=21,3s,3,1
-add action=drop chain=input comment="1.5. Protected - WinBox Access" src-address-list="Black List Winbox"
-add action=add-src-to-address-list address-list="Black List Winbox" address-list-timeout=none-dynamic chain=input connection-state=new dst-port=8291 in-interface-list=Internet log=yes log-prefix="BLACK WINBOX" protocol=tcp src-address-list="Winbox Stage 3"
-add action=add-src-to-address-list address-list="Winbox Stage 3" address-list-timeout=1m chain=input connection-state=new dst-port=8291 in-interface-list=Internet protocol=tcp src-address-list="Winbox Stage 2"
-add action=add-src-to-address-list address-list="Winbox Stage 2" address-list-timeout=1m chain=input connection-state=new dst-port=8291 in-interface-list=Internet protocol=tcp src-address-list="Winbox Stage 1"
-add action=add-src-to-address-list address-list="Winbox Stage 1" address-list-timeout=1m chain=input connection-state=new dst-port=8291 in-interface-list=Internet protocol=tcp
-add action=accept chain=input dst-port=8291 in-interface-list=Internet protocol=tcp
-add action=drop chain=input comment="1.6. Protected - OpenVPN Connections" src-address-list="Black List OpenVPN"
-add action=add-src-to-address-list address-list="Black List OpenVPN" address-list-timeout=none-dynamic chain=input connection-state=new dst-port=1194 in-interface-list=Internet log=yes log-prefix="BLACK OVPN" protocol=tcp src-address-list="OpenVPN Stage 3"
-add action=add-src-to-address-list address-list="OpenVPN Stage 3" address-list-timeout=1m chain=input connection-state=new dst-port=1194 in-interface-list=Internet protocol=tcp src-address-list="OpenVPN Stage 2"
-add action=add-src-to-address-list address-list="OpenVPN Stage 2" address-list-timeout=1m chain=input connection-state=new dst-port=1194 in-interface-list=Internet protocol=tcp src-address-list="OpenVPN Stage 1"
-add action=add-src-to-address-list address-list="OpenVPN Stage 1" address-list-timeout=1m chain=input connection-state=new dst-port=1194 in-interface-list=Internet protocol=tcp
 add action=accept chain=input dst-port=1194 in-interface-list=Internet protocol=tcp
 add action=accept chain=input comment="1.7. Access OpenVPN Tunnel Data" in-interface-list=VPN
-add action=accept chain=input comment="1.8. Access Normal Ping" in-interface-list=Internet limit=50/5s,2:packet protocol=icmp
 add action=drop chain=input comment="1.9. Drop All Other" in-interface-list=Internet
 
 /ip firewall raw
@@ -196,6 +174,7 @@ add action=return chain=DDoS-Protect dst-limit=15,15,src-address/10s
 add action=add-src-to-address-list address-list=ddos-blacklist address-list-timeout=1w3d chain=DDoS-Protect log-prefix="DDoS: MAIN-Protect"
 add action=drop chain=input comment="DROP - Block all other input/forward connections on the WAN" in-interface-list=Internet
 add action=drop chain=forward in-interface-list=Internet
+
 /ip firewall raw
 add action=drop chain=prerouting comment="DDoS - Drop blacklist IP" in-interface-list=Internet src-address-list=ddos-blacklist
 
@@ -213,8 +192,23 @@ add action=return chain=DDoS-Protect dst-limit=15,15,src-address/10s
 add action=add-src-to-address-list address-list=ddos-blacklist address-list-timeout=1w3d chain=DDoS-Protect log-prefix="DDoS: MAIN-Protect"
 add action=drop chain=input comment="DROP - Block all other input/forward connections on the WAN" in-interface-list=ISP
 add action=drop chain=forward in-interface-list=ISP
+
 /ip firewall nat
 add action=masquerade chain=srcnat comment="defconf: masquerade" ipsec-policy=out,none out-interface-list=ISP src-address=10.64.0.0/24
+
 /ip firewall raw
 add action=drop chain=prerouting comment="DDoS - Drop blacklist IP" in-interface-list=ISP src-address-list=ddos-blacklist
+
+
+add chain=input action=accept connection-state=established,related,untracked comment="defconf: accept established,related,untracked"
+add chain=input action=drop connection-state=invalid comment="defconf: drop invalid"
+add chain=input action=accept protocol=icmp comment="defconf: accept ICMP"
+add chain=input action=accept dst-address=127.0.0.1 comment="defconf: accept to local loopback (for CAPsMAN)"
+add chain=input action=drop in-interface-list=!LAN comment="defconf: drop all not coming from LAN"
+add chain=forward action=accept ipsec-policy=in,ipsec comment="defconf: accept in ipsec policy"
+add chain=forward action=accept ipsec-policy=out,ipsec comment="defconf: accept out ipsec policy"
+add chain=forward action=fasttrack-connection connection-state=established,related comment="defconf: fasttrack"
+add chain=forward action=accept connection-state=established,related,untracked comment="defconf: accept established,related, untracked"
+add chain=forward action=drop connection-state=invalid comment="defconf: drop invalid"
+add chain=forward action=drop connection-state=new connection-nat-state=!dstnat in-interface-list=WAN comment="defconf: drop all from WAN not DSTNATed"
 
