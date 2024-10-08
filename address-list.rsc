@@ -16,10 +16,10 @@ add address=240.0.0.0/4 comment=RFC6890 list=not_in_internet
 add address=192.88.99.0/24 comment="6to4 relay Anycast [RFC 3068]" list=not_in_internet
 
 /ip firewall address-list
-  add address=0.0.0.0/8 comment="defconf: RFC6890" list=no_forward_ipv4
-  add address=169.254.0.0/16 comment="defconf: RFC6890" list=no_forward_ipv4
-  add address=224.0.0.0/4 comment="defconf: multicast" list=no_forward_ipv4
-  add address=255.255.255.255/32 comment="defconf: RFC6890" list=no_forward_ipv4
+add address=0.0.0.0/8 comment="defconf: RFC6890" list=no_forward_ipv4
+add address=169.254.0.0/16 comment="defconf: RFC6890" list=no_forward_ipv4
+add address=224.0.0.0/4 comment="defconf: multicast" list=no_forward_ipv4
+add address=255.255.255.255/32 comment="defconf: RFC6890" list=no_forward_ipv4
 
 /ip firewall address-list
 add list=ddos-attackers
