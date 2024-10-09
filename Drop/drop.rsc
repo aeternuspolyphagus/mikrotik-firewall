@@ -4,4 +4,4 @@ add chain=Drop-chain action=drop
 
 /ip firewall raw
 add chain=prerouting action=passthrough comment="Drop from prerouting"
-add chain=prerouting action=drop src-address-list=protect
+add chain=prerouting action=drop src-address-list=Banned
