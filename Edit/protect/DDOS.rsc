@@ -1,5 +1,5 @@
 /ip firewall filter
-add chain=Detect-DDoS comment="DDoS detect chain" action=passthougth
-add chain=Detect-DDoS dst-limit=32,32,src-and-dst-addresses/10s action=return
-add chain=Detect-DDoS address-list=ddos-targets address-list-timeout=10m action=add-dst-to-address-list
-add chain=Detect-DDoS address-list=ddos-attackers address-list-timeout=10m action=add-src-to-address-list
+add chain=Detect-DDoS action=passthougth comment="DDoS detect chain" 
+add chain=Detect-DDoS action=return dst-limit=32,32,src-and-dst-addresses/10s 
+add chain=Detect-DDoS action=add-dst-to-address-list address-list=ddos-targets address-list-timeout=10m 
+add chain=Detect-DDoS action=add-src-to-address-list address-list=ddos-attackers address-list-timeout=10m 

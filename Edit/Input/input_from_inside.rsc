@@ -1,6 +1,6 @@
 /ip firewall filter
-add chain=Input-Inside comment="Input chain to router from inside" action=passthougth
-add chain=Input-Inside connection-state=established action=accept
-add chain=Input-Inside connection-state=related action=accept
-add chain=Input-Inside connection-state=untracked action=accept
-add chain=Input-Inside connection-state=invalid action=jump jump-target=Drop-chain
+add chain=Input-Inside action=passthougth comment="Input chain to router from inside" 
+add chain=Input-Inside action=accept connection-state=established 
+add chain=Input-Inside action=accept connection-state=related 
+add chain=Input-Inside action=accept connection-state=untracked 
+add chain=Input-Inside action=jump jump-target=Drop-chain connection-state=invalid 

@@ -1,4 +1,4 @@
 /ip firewall filter
-add chain=Detect-SynFlood comment="SynFlood detect chain" action=passthougth
-add chain=Detect-SynFlood connection-state=new limit=200,5:packet protocol=tcp tcp-flags=syn action=return
-add chain=Detect-SynFlood address-list=Banned address-list-timeout=1w3d action=add-dst-to-address-list
+add chain=Detect-SynFlood action=passthougth comment="SynFlood detect chain"
+add chain=Detect-SynFlood action=return connection-state=new protocol=tcp tcp-flags=syn limit=200,5:packet
+add chain=Detect-SynFlood action=add-dst-to-address-list address-list=Banned address-list-timeout=1w3d

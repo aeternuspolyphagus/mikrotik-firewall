@@ -1,8 +1,8 @@
 /ip firewall filter
-add chain=input comment="Input chain to router" action=passthougth
-add chain=input protocol=icmp action=jump jump-target=Icmp-Chain
+add chain=input comment="Input chain to router" action=passthrough
+add chain=input action=jump jump-target=Icmp-Chain protocol=icmp
 add chain=input action=jump jump-target=Protected-chain
-add chain=input in-interface-list=Outside action=jump jump-target=Input-Outside
-add chain=input in-interface-list=Inside action=jump jump-target=Input-Inside
-add chain=input in-interface-list=!Outside action=jump jump-target=Drop-chain disabled=yes
-add chain=input in-interface-list=!Inside action=jump jump-target=Drop-chain disabled=yes
+add chain=input action=jump jump-target=Input-Outside in-interface-list=Outside
+add chain=input action=jump jump-target=Input-Inside in-interface-list=Inside
+add chain=input action=jump jump-target=Drop-chain in-interface-list=!Outside disabled=yes
+add chain=input action=jump jump-target=Drop-chain in-interface-list=!Inside disabled=yes
