@@ -1,7 +1,7 @@
 /ip firewall filter
 add chain=forward action=passthrough comment="Forward chain"
-add chain=forward action=fasttrack-connection connection-state=established
-add chain=forward action=fasttrack-connection connection-state=related
+add chain=forward action=fasttrack-connection connection-state=established connection-mark=!ipsec 
+add chain=forward action=fasttrack-connection connection-state=related connection-mark=!ipsec 
 add chain=forward action=accept connection-state=established
 add chain=forward action=accept connection-state=related
 add chain=forward action=accept connection-state=untracked
