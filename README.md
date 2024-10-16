@@ -1,20 +1,19 @@
 # mikrotik-firewall
 My humble vision on mikrotik about firewall rules.
 
+#### Input chain
 ```
-    ##### Input chain#####
-
-    /ip firewall filter
-    add chain=input action=passthrough comment="Input chain to router"
-    add chain=input action=jump jump-target=Icmp-Chain protocol=icmp
-    add chain=input action=jump jump-target=Protected-chain
-    add chain=input action=jump jump-target=Input-Outside in-interface-list=Outside
-    add chain=input action=jump jump-target=Input-Inside in-interface-list=Inside
-    add chain=input action=jump jump-target=Drop-chain in-interface-list=!Outside disabled=yes
-    add chain=input action=jump jump-target=Drop-chain in-interface-list=!Inside disabled=yes
-
-    ##### Input chain from Outside #####
-
+  /ip firewall filter
+  add chain=input action=passthrough comment="Input chain to router"
+  add chain=input action=jump jump-target=Icmp-Chain protocol=icmp
+  add chain=input action=jump jump-target=Protected-chain
+  add chain=input action=jump jump-target=Input-Outside in-interface-list=Outside
+  add chain=input action=jump jump-target=Input-Inside in-interface-list=Inside
+  add chain=input action=jump jump-target=Drop-chain in-interface-list=!Outside disabled=yes
+  add chain=input action=jump jump-target=Drop-chain in-interface-list=!Inside disabled=yes
+```
+####  Input chain from Outside
+```
     /ip firewall filter
     add chain=Input-Outside action=passthougth comment="Input chain to router from outside"
     add chain=Input-Outside action=accept connection-state=established
@@ -29,9 +28,9 @@ My humble vision on mikrotik about firewall rules.
     add chain=Input-Outside-Allow  action=passthougth comment="Allow input chain to router from outside"
     add chain=Input-Outside-Allow  action=jump jump-target=BruteForce protocol=tcp dst-port=22 connection-nat-state=dstnat
     add chain=Input-Outside-Allow  action=jump jump-target=BruteForce protocol=tcp dst-port=8291
-
-    ##### Input chain from Inside #####
-
+```
+#### Input chain from Inside
+```
     /ip firewall filter
     add chain=Input-Inside action=passthougth comment="Input chain to router from inside" 
     add chain=Input-Inside action=accept connection-state=established 
@@ -48,9 +47,9 @@ My humble vision on mikrotik about firewall rules.
     add chain=Input-Inside-All action=accept src-address-list=MNGMNT protocol=tcp dst-port=22
     add chain=Input-Inside-All action=accept src-address-list=MNGMNT protocol=tcp dst-port=8291
     add chain=Input-Inside-All action=jump jump-target=Drop-chain
-
-    ##### Forward Chain #####
-
+```
+#### Forward Chain
+```
     /ip firewall filter
     add chain=forward action=passthrough comment="Forward chain"
     add chain=forward action=fasttrack-connection connection-state=established connection-mark=!ipsec 
@@ -64,9 +63,9 @@ My humble vision on mikrotik about firewall rules.
     add chain=forward action=jump jump-target=Protected-chain
     add chain=forward in-interface-list=Outside action=jump jump-target=Forward-Outside
     add chain=forward in-interface-list=Inside action=jump jump-target=Forward-Inside
-
-    #### Forward from Outside ####
-
+```
+#### Forward from Outside
+```
     /ip firewall filter
     add chain=Forward-Outside action=passthrough comment="Forward chain from outside to inside"
     add chain=Forward-Outside action=accept ipsec-policy=in,ipsec action=accept
@@ -74,17 +73,17 @@ My humble vision on mikrotik about firewall rules.
     add chain=Forward-Outside action=jump jump-target=Drop-chain in-interface-list=Outside out-interface-list=!Inside src-address-list=not_in_internet
     add chain=Forward-Outside connection-nat-state=dstnat action=accept
     add chain=Forward-Outside action=jump jump-target=Drop-chain
-
-    #### FOrward from Inside ####
-
+```
+#### FOrward from Inside ####
+```
     /ip firewall filter
     add chain=Forward-Inside action=passthrough comment="Forward chain from inside to outside"
     add chain=Forward-Inside action=jump jump-target=Drop-chain in-interface-list=Inside out-interface-list=!Inside dst-address-list=not_in_internet
     add chain=Forward-Inside action=accept in-interface-list=Inside out-interface-list=Outside
     add chain=Forward-Inside action=accept in-interface-list=Inside out-interface-list=Inside
-
-    ##### ICMP chain #####
-
+```
+#### ICMP chain
+```
     /ip firewall filter
     add chain=Icmp-Chain action=passthougth comment="ICMP chain" 
     add chain=Icmp-Chain action=accept protocol=icmp icmp-options=0:0 comment="echo reply"
@@ -95,9 +94,9 @@ My humble vision on mikrotik about firewall rules.
     add chain=Icmp-Chain action=accept protocol=icmp icmp-options=11:0 comment="allow time exceed"
     add chain=Icmp-Chain action=accept protocol=icmp icmp-options=12:0 comment="allow parameter bad"
     add chain=Icmp-Chain action=jump jump-target=Drop-chain
-
-    ##### fail2ban chain #####
-
+```
+#### fail2ban chain
+```
     /ip firewall filter
     add chain=BruteForce action=passthougth comment="BruteForce chain to router"
     add chain=BruteForce action=add-src-to-address-list address-list=Banned src-address-list=Stage_3 address-list-timeout=1d  comment=Blacklist 
@@ -105,9 +104,9 @@ My humble vision on mikrotik about firewall rules.
     add chain=BruteForce action=add-src-to-address-list address-list=Stage_2 src-address-list=Stage_1 address-list-timeout=15m  comment="Second attempt" 
     add chain=BruteForce action=add-src-to-address-list address-list=Stage_1 address-list-timeout=5m  comment="First attempt" 
     add chain=Bruteforce action=accept 
-
-    ##### Security chain #####
-
+```
+#### Security chain
+```
     /ip firewall filter
     add chain=Protected-chain action=passthougth comment="Protect chain"
     add chain=Protected-chain action=jump jump-target=Detect-DDoS connection-state=new
@@ -137,30 +136,30 @@ My humble vision on mikrotik about firewall rules.
     /ip firewall filter
     add chain=Detect-Portscanners action=passthougth comment="Port scanner detect chain" action=passthougth
     add chain=Detect-Portscanners action=add-src-to-address-list address-list=Banned address-list-timeout=none-dynamic protocol=tcp psd=21,3s,3,1
-
-    ##### Drop chain #####
-
+```
+#### Drop chain
+```
     /ip firewall filter
     add chain=Drop-chain action=passthrough comment="Main drop chain"
     add chain=Drop-chain action=drop
-
-    ##### Raw mangle chain #####
-
+```
+#### Raw mangle chain 
+```
     /ip firewall raw
     add chain=prerouting action=passthrough comment="Drop from prerouting"
     add chain=prerouting action=drop src-address-list=Banned
     add chain=prerouting action=drop src-address-list=ddos-attackers dst-address-list=ddos-targets
-
-    ##### Mangle chain #####
-
+```
+#### Mangle chain
+```
     /ip firewall mangle
     add action=mark-connection chain=input comment="mark ipsec connections to exclude them from fasttrack" ipsec-policy=in,ipsec new-connection-mark=ipsec
     add action=mark-connection chain=output comment="mark ipsec connections to exclude them from fasttrack" ipsec-policy=out,ipsec new-connection-mark=ipsec 
     add action=mark-connection chain=forward comment="mark ipsec connections to exclude them from fasttrack" ipsec-policy=out,ipsec new-connection-mark=ipsec 
     add action=mark-connection chain=forward comment="mark ipsec connections to exclude them from fasttrack" ipsec-policy=in,ipsec new-connection-mark=ipsec
-
-    ##### Address-Lists ####
-
+```
+#### Address-Lists
+```
     /ip firewall address-list
     add list=ddos-attackers
     add list=ddos-targets
@@ -188,9 +187,9 @@ My humble vision on mikrotik about firewall rules.
     add address=169.254.0.0/16 comment="RFC6890" list=no_forward_ipv4
     add address=224.0.0.0/4 comment="multicast" list=no_forward_ipv4
     add address=255.255.255.255/32 comment="RFC6890" list=no_forward_ipv4
-
-    #### NAT ####
-    
+```
+#### NAT ####
+```
     /ip firewall nat
     add chain=srcnat action=accept ipsec-policy=out,ipsec
     add chain=dstnat action=accept ipsec-policy=in,ipsec
