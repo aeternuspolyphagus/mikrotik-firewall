@@ -9,7 +9,7 @@ add chain=input action=jump jump-target=Drop-chain in-interface-list=!Outside di
 add chain=input action=jump jump-target=Drop-chain in-interface-list=!Inside disabled=yes
 ##### Input chain from Outside #####
 /ip firewall filter
-add chain=Input-Outside action=passthougth comment="Input chain to router from outside"
+add chain=Input-Outside action=passthrough comment="Input chain to router from outside"
 add chain=Input-Outside action=accept connection-state=established
 add chain=Input-Outside action=accept connection-state=related
 add chain=Input-Outside action=accept connection-state=untracked
@@ -18,12 +18,12 @@ add chain=Input-Outside action=accept ipsec-policy=in,ipsec action=accept
 add chain=Input-Outside action=jump jump-target=Input-Outside-Allow
 add chain=Input-Outside action=jump jump-target=Drop-chain
 /ip firewall filter
-add chain=Input-Outside-Allow  action=passthougth comment="Allow input chain to router from outside"
+add chain=Input-Outside-Allow  action=passthrough comment="Allow input chain to router from outside"
 add chain=Input-Outside-Allow  action=jump jump-target=BruteForce protocol=tcp dst-port=22 connection-nat-state=dstnat
 add chain=Input-Outside-Allow  action=jump jump-target=BruteForce protocol=tcp dst-port=8291
 ##### Input chain from Inside #####
 /ip firewall filter
-add chain=Input-Inside action=passthougth comment="Input chain to router from inside" 
+add chain=Input-Inside action=passthrough comment="Input chain to router from inside" 
 add chain=Input-Inside action=accept connection-state=established 
 add chain=Input-Inside action=accept connection-state=related 
 add chain=Input-Inside action=accept connection-state=untracked 
@@ -67,7 +67,7 @@ add chain=Forward-Inside action=accept in-interface-list=Inside out-interface-li
 add chain=Forward-Inside action=accept in-interface-list=Inside out-interface-list=Inside
 ##### ICMP chain #####
 /ip firewall filter
-add chain=Icmp-Chain action=passthougth comment="ICMP chain" 
+add chain=Icmp-Chain action=passthrough comment="ICMP chain" 
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=0:0 comment="echo reply"
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=3:0 comment="net unreachable"
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=3:1 comment="host unreachable"
@@ -78,7 +78,7 @@ add chain=Icmp-Chain action=accept protocol=icmp icmp-options=12:0 comment="allo
 add chain=Icmp-Chain action=jump jump-target=Drop-chain
 ##### fail2ban chain #####
 /ip firewall filter
-add chain=BruteForce action=passthougth comment="BruteForce chain to router"
+add chain=BruteForce action=passthrough comment="BruteForce chain to router"
 add chain=BruteForce action=add-src-to-address-list address-list=Banned src-address-list=Stage_3 address-list-timeout=1d  comment=Blacklist 
 add chain=BruteForce action=add-src-to-address-list address-list=Stage_3 src-address-list=Stage_2,!secured address-list-timeout=1h  comment="Third attempt" 
 add chain=BruteForce action=add-src-to-address-list address-list=Stage_2 src-address-list=Stage_1 address-list-timeout=15m  comment="Second attempt" 
@@ -86,28 +86,28 @@ add chain=BruteForce action=add-src-to-address-list address-list=Stage_1 address
 add chain=Bruteforce action=accept 
 ##### Security chain #####
 /ip firewall filter
-add chain=Protected-chain action=passthougth comment="Protect chain"
+add chain=Protected-chain action=passthrough comment="Protect chain"
 add chain=Protected-chain action=jump jump-target=Detect-DDoS connection-state=new
 add chain=Protected-chain action=jump jump-target=Detect-SynFlood connection-state=new protocol=tcp tcp-flags=syn
 add chain=Protected-chain action=jump jump-target=Detect-SynAttack connection-state=new
 add chain=Protected-chain action=jump jump-target=Detect-PortScanners connection-state=new
 /ip firewall filter
-add chain=Detect-DDoS action=passthougth comment="DDoS detect chain" 
+add chain=Detect-DDoS action=passthrough comment="DDoS detect chain" 
 add chain=Detect-DDoS action=return dst-limit=32,32,src-and-dst-addresses/10s 
 add chain=Detect-DDoS action=add-dst-to-address-list address-list=ddos-targets address-list-timeout=10m 
 add chain=Detect-DDoS action=add-src-to-address-list address-list=ddos-attackers address-list-timeout=10m 
 /ip firewall filter
-add chain=Detect-SynFlood action=passthougth comment="SynFlood detect chain"
+add chain=Detect-SynFlood action=passthrough comment="SynFlood detect chain"
 add chain=Detect-SynFlood action=return connection-state=new protocol=tcp tcp-flags=syn limit=200,5:packet
 add chain=Detect-SynFlood action=add-dst-to-address-list address-list=Banned address-list-timeout=1w3d
 /ip settings 
 set tcp-syncookies=yes
 /ip firewall filter
-add chain=Detect-SynAttack action=passthougth comment="SynAttack detect chain"
+add chain=Detect-SynAttack action=passthrough comment="SynAttack detect chain"
 add chain=Detect-SynAttack action=return protocol=tcp tcp-flags=syn,ack dst-limit=32,32,src-and-dst-addresses/10s
 add chain=Detect-SynAttack action=add-dst-to-address-list address-list=Banned address-list-timeout=1w3d
 /ip firewall filter
-add chain=Detect-Portscanners action=passthougth comment="Port scanner detect chain" action=passthougth
+add chain=Detect-Portscanners action=passthrough comment="Port scanner detect chain" action=passthrough
 add chain=Detect-Portscanners action=add-src-to-address-list address-list=Banned address-list-timeout=none-dynamic protocol=tcp psd=21,3s,3,1
 ##### Drop chain #####
 /ip firewall filter

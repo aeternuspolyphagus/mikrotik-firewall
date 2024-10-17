@@ -1,5 +1,5 @@
 /ip firewall filter
-add chain=Input-Inside action=passthougth comment="Input chain to router from inside" 
+add chain=Input-Inside action=passthrough comment="Input chain to router from inside" 
 add chain=Input-Inside action=accept connection-state=established 
 add chain=Input-Inside action=accept connection-state=related 
 add chain=Input-Inside action=accept connection-state=untracked 

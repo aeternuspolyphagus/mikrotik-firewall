@@ -1,5 +1,5 @@
 /ip firewall filter
-add chain=Icmp-Chain action=passthougth comment="ICMP chain" 
+add chain=Icmp-Chain action=passthrough comment="ICMP chain" 
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=0:0 comment="echo reply"
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=3:0 comment="net unreachable"
 add chain=Icmp-Chain action=accept protocol=icmp icmp-options=3:1 comment="host unreachable"
