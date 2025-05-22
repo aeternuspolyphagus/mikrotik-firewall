@@ -107,7 +107,7 @@ add chain=Detect-SynAttack action=passthrough comment="SynAttack detect chain"
 add chain=Detect-SynAttack action=return protocol=tcp tcp-flags=syn,ack dst-limit=32,32,src-and-dst-addresses/10s
 add chain=Detect-SynAttack action=add-dst-to-address-list address-list=Banned address-list-timeout=1w3d
 /ip firewall filter
-add chain=Detect-Portscanners action=passthrough comment="Port scanner detect chain" action=passthrough
+add chain=Detect-Portscanners action=passthrough comment="Port scanner detect chain"
 add chain=Detect-Portscanners action=add-src-to-address-list address-list=Banned address-list-timeout=none-dynamic protocol=tcp psd=21,3s,3,1
 ##### Drop chain #####
 /ip firewall filter
